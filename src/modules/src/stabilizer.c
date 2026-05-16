@@ -61,7 +61,7 @@ static bool isInit;
 
 static uint32_t inToOutLatency;
 
-// State variables for the stabilizer
+// 稳定的状态变量
 static setpoint_t setpoint;
 static sensorData_t sensorData;
 static state_t state;
@@ -71,7 +71,7 @@ static motors_thrust_uncapped_t motorThrustUncapped;
 static motors_thrust_uncapped_t motorThrustBatCompUncapped;
 static motors_thrust_pwm_t motorPwm;
 
-// For scratch storage - never logged or passed to other subsystems.
+// 用作临时存储，绝不记录日志，也不会传输至其他子系统。
 static setpoint_t tempSetpoint;
 
 static StateEstimatorType estimatorType;
