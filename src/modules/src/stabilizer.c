@@ -209,10 +209,10 @@ static void batteryCompensation(const motors_thrust_uncapped_t* motorThrustUncap
 {
   // Low pass on the BatteryVoltage
   float b = 0.01f; // 0.2f = Convergence (95%) in ~10 steps = ~20ms
-  static float supplyVoltage = 4.2;
+  static float supplyVoltage = 4.2; // 电池满电压 = 4.2V
   supplyVoltage = supplyVoltage + b*(pmGetBatteryVoltage() - supplyVoltage);
 
-  for (int motor = 0; motor < STABILIZER_NR_OF_MOTORS; motor++)
+  for (int motor = 0; motor < STABILIZER_NR_OF_MOTORS; motor++) // 遍历 4 个电机
   {
     motorThrustBatCompUncapped->list[motor] = motorsCompensateBatteryVoltage(motor, motorThrustUncapped->list[motor], supplyVoltage);
   }
@@ -253,11 +253,11 @@ static void logCapWarning(const bool isCapped) {
 }
 
 static void controlMotors(const control_t* control) {
-  powerDistribution(control, &motorThrustUncapped);
-  batteryCompensation(&motorThrustUncapped, &motorThrustBatCompUncapped);
-  const bool isCapped = powerDistributionCap(&motorThrustBatCompUncapped, &motorPwm);
-  logCapWarning(isCapped);
-  setMotorRatios(&motorPwm);
+  powerDistribution(control, &motorThrustUncapped); // 控制量 → 推力分配
+  batteryCompensation(&motorThrustUncapped, &motorThrustBatCompUncapped); // 电池电压补偿
+  const bool isCapped = powerDistributionCap(&motorThrustBatCompUncapped, &motorPwm); // 推力限制，得到最终的 PWM 输出
+  logCapWarning(isCapped); // 记录推力饱和的警告日志
+  setMotorRatios(&motorPwm); // 设置电机 PWM 输出
 }
 
 void rateSupervisorTask(void *pvParameters) {
@@ -313,32 +313,34 @@ static void stabilizerTask(void* param)
   motorsResetESCs();
 
   while(1) {
-    // The sensor should unlock at 1kHz
-    sensorsWaitDataReady();
+    // The sensor should unlock at 1kHz -- 该传感器应在 1kHZ 频率下解锁
+    sensorsWaitDataReady(); // 等待传感器数据就绪（1kHz 触发）
 
-    // update sensorData struct (for logging variables)
+    // 获取传感器数据，更新 sensorData 结构体（用于日志记录变量）
     sensorsAcquire(&sensorData);
 
     if (healthShallWeRunTest()) {
       healthRunTests(&sensorData);
     } else {
       updateStateEstimatorAndControllerTypes();
-
-      stateEstimator(&state, stabilizerStep);
-
+      /* 1. 状态估计 */
+      stateEstimator(&state, stabilizerStep); 
+      /* 2. 安全检查：电机是否允许运行 */
       const bool areMotorsAllowedToRun = supervisorAreMotorsAllowedToRun();
 
       // Critical for safety, be careful if you modify this code!
       crtpCommanderBlock(! areMotorsAllowedToRun);
-
+      /* 3. 获取高层指挥官设定值 */
       if (crtpCommanderHighLevelGetSetpoint(&tempSetpoint, &state, stabilizerStep)) {
         commanderSetSetpoint(&tempSetpoint, COMMANDER_PRIORITY_HIGHLEVEL);
       }
+      /* 4. 获取指挥官设定值 */
       commanderGetSetpoint(&setpoint, &state);
 
       // Critical for safety, be careful if you modify this code!
       // Let the supervisor update it's view of the current situation
-      supervisorUpdate(&sensorData, &setpoint, stabilizerStep);
+      /* 5. 监督器更新 & 碰撞避免 */
+      supervisorUpdate(&sensorData, &setpoint, stabilizerStep); // 监督器可强制覆盖设定值
 
       // Let the collision avoidance module modify the setpoint, if needed
       collisionAvoidanceUpdateSetpoint(&setpoint, &sensorData, &state, stabilizerStep);
@@ -346,11 +348,12 @@ static void stabilizerTask(void* param)
       // Critical for safety, be careful if you modify this code!
       // Let the supervisor modify the setpoint to handle exceptional conditions
       supervisorOverrideSetpoint(&setpoint);
-
+      /* 6. 控制器计算控制量 */
       controller(&control, &setpoint, &sensorData, &state, stabilizerStep);
 
       // Critical for safety, be careful if you modify this code!
-      // The supervisor will already set thrust to 0 in the setpoint if needed, but to be extra sure prevent motors from running.
+      // 如有需要，监管程序已会在设定值中将推力设为零，而为进一步稳妥起见，需避免电机运转。
+      /*7. 控制电机 */
       if (areMotorsAllowedToRun) {
         controlMotors(&control);
 #ifdef CONFIG_MOTORS_ESC_PROTOCOL_DSHOT

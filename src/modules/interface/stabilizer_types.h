@@ -35,7 +35,7 @@
  * All have a timestamp to be set when the data is calculated.
  */
 
-// stabilizerStep_t represents the number of times the stabilizer loop has run (at 1000 Hz)
+// stabilizerStep_t 代表稳定器循环的运行次数（频率为 1kHz）
 typedef uint32_t stabilizerStep_t;
 
 /** Attitude in euler angle form */
@@ -192,7 +192,7 @@ typedef enum control_mode_e {
 
 typedef struct control_s {
   union {
-    // controlModeLegacy
+    // controlModeLegacy-- 传统控制模式
     struct {
       int16_t roll;
       int16_t pitch;
@@ -215,7 +215,7 @@ typedef struct control_s {
       };
     };
 
-    // controlModeForce
+    // controlModeForce -- 每个电机的归一化推力 0.0~1.0
     float normalizedForces[STABILIZER_NR_OF_MOTORS]; // 0.0 ... 1.0
   };
 

@@ -62,7 +62,7 @@ tb make unit                       # 通过 toolbelt（Docker）运行
 | **稳定器** | `src/modules/src/stabilizer.c` | 1kHz 主循环：传感器 → 估计器 → 控制器 → 电机 |
 | **状态估计器** | `src/modules/src/estimator/` | 互补滤波器 & 扩展卡尔曼滤波器 |
 | **控制器** | `src/modules/src/controller/` | PID、Mellinger、INDI、Brescianini、Lee |
-| **传感器** | `src/drivers/` + `src/sensors/` | IMU（BMI088/MPU9250）、气压计、磁力计 |
+| **传感器** | `src/drivers/` + `src/hal/` | IMU（BMI088/MPU9250）、气压计、磁力计 |
 | **指令器** | `src/modules/src/crtp_commander*.c` | 通过无线电/CRTP 处理设定值 |
 | **功率分配** | `src/modules/src/power_distribution_*.c` | 电机推力 → PWM 转换，含电池补偿 |
 | **扩展板系统** | `src/deck/` | 扩展板驱动（参见 [howto](docs/development/howto.md)） |
@@ -80,7 +80,7 @@ src/
 ├── platform/          # 平台特定代码（cf2、bolt、tag、flapper）
 ├── init/              # 系统初始化
 ├── utils/src/         # 工具函数
-└── lib/               # STM32 HAL、FatFS、USB 等
+└── lib/               # STM32F4xx 标准外设库、FatFS、USB 等
 vendor/                # 第三方库：FreeRTOS、CMSIS、libdw1000、Unity、CMock
 configs/               # 各平台/功能的 Kconfig 默认配置文件
 test/                  # 单元测试（镜像 src/ 的结构）

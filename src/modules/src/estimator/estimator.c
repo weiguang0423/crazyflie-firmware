@@ -133,7 +133,7 @@ void stateEstimatorSwitchTo(StateEstimatorType estimator) {
     DEBUG_PRINT("Estimator type forced\n");
     newEstimator = forcedEstimator;
   }
-
+  /* 实际切换 */
   initEstimator(newEstimator);
   StateEstimatorType previousEstimator = currentEstimator;
   currentEstimator = newEstimator;

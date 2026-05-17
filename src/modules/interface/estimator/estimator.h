@@ -41,7 +41,7 @@ typedef enum {
   StateEstimatorTypeOutOfTree,
 #endif
   StateEstimatorType_COUNT,
-} StateEstimatorType;
+} StateEstimatorType; // 未显式赋值的枚举项会自动在前一个值的基础上加1。第一个枚举值默认是0。
 
 typedef enum {
   MeasurementTypeTDOA,

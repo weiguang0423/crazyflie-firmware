@@ -55,10 +55,10 @@ int main()
     while(1);
   }
 
-  //Launch the system task that will initialize and start everything
+  /* 启动用于初始化并开启所有程序的系统任务 */
   systemLaunch();
 
-  //Start the FreeRTOS scheduler
+  /* 启动 FreeRTOS 调度器 */
   vTaskStartScheduler();
 
   //TODO: Move to platform launch failed

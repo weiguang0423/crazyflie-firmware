@@ -68,7 +68,7 @@ void check_enter_bootloader(){
     *BL_STATE_PTR = BL_STATE_INVALID;
 
     if(BL_STATE_GET_KEY(bl_state) == BL_STATE_KEY && (RCC->CSR & RCC_CSR_SFTRSTF)){
-        //if botloader data valid and was just reset with NVIC_SystemReset
+        //if bootloader data valid and was just reset with NVIC_SystemReset
 
         //remap memory to system flash
         SYSCFG_MemoryRemapConfig(SYSCFG_MemoryRemap_SystemFlash);
